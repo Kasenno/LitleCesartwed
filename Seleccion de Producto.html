@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzería Little Cesart</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        header, footer {
+            background-color: #ff0000;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        section {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos para los formularios */
+        form {
+            display: flex;
+            flex-direction: column;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        label {
+            margin-bottom: 5px;
+        }
+
+        input, select, button {
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        /* Estilos para la tabla de pedidos */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #333;
+            color: #fff;
+        }
+
+        /* Estilos para el total */
+        #total {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Estilos para el botón de pagar */
+        #btn-pagar {
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #btn-pagar:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Pizzería Little Cesart</h1>
+    </header>
+    <main>
+        <section id="pedir">
+            <h2>Hacer Pedido</h2>
+            <form id="pedido-form">
+                <label for="mesa">Mesa:</label>
+                <select id="mesa" required>
+                    <option value="">Seleccionar mesa</option>
+                    <option value="1">Mesa 1</option>
+                    <option value="2">Mesa 2</option>
+                    <option value="3">Mesa 3</option>
+                    <option value="4">Mesa 4</option>
+                    <option value="5">Mesa 5</option>
+                    <option value="6">Mesa 6</option>
+                    <option value="7">Mesa 7</option>
+                    <!-- Agrega más opciones según el número de mesas disponibles -->
+                </select>
+                <label for="categoria">Categoría:</label>
+                <select id="categoria" required>
+                    <option value="">Seleccionar categoría</option>
+                    <option value="Comidas">Comidas</option>
+                    <option value="Acompañamientos">Acompañamientos</option>
+                    <option value="Bebidas">Bebidas</option>
+                </select>
+                <label for="producto">Producto:</label>
+                <select id="producto" required>
+                    <option value="">Seleccionar producto</option>
+                </select>
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" id="cantidad" min="1" required>
+                <button type="submit">Agregar al Pedido</button>
+            </form>
+        </section>
+        <section id="visualizar-pedidos">
+            <h2>Pedidos Realizados</h2>
+            <table id="pedidos-table">
+                <thead>
+                    <tr>
+                        <th>Mesa</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Total</th>
+                        <th>Acciones</th> <!-- Columna para acciones (eliminar pedido) -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se mostrarán los pedidos -->
+                </tbody>
+            </table>
+            <div id="total"></div>
+            <button id="btn-pagar">Pagar</button> <!-- Botón de pagar -->
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Pizzería Little Cesart</p>
+    </footer>
+    <script>
+        // Opciones de productos por categoría
+        var productosPorCategoria = {
+            'Comidas': ['Pizza Margarita', 'Pizza Pepperoni'],
+            'Acompañamientos': ['Papas Fritas', 'Ensalada César'],
+            'Bebidas': ['Pepsi Cola', 'Agua Mineral']
+        };
+
+        // Obtener elementos del formulario
+        var mesaSelect = document.getElementById('mesa');
+        var categoriaSelect = document.getElementById('categoria');
+        var productoSelect = document.getElementById('producto');
+
+        // Llenar el select de productos según la categoría seleccionada
+        categoriaSelect.addEventListener('change', function() {
+            var categoria = this.value;
+            productoSelect.innerHTML = '<option value="">Seleccionar producto</option>';
+            productosPorCategoria[categoria].forEach(function(producto) {
+                productoSelect.innerHTML += '<option value="' + producto + '">' + producto + '</option>';
+            });
+        });
+
+        document.getElementById('pedido-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var mesa = mesaSelect.value;
+            var producto = document.getElementById('producto').value;
+            var cantidad = parseInt(document.getElementById('cantidad').value);
+
+            // Calcular el precio total
+            var precioTotal = calcularPrecioTotal(producto, cantidad);
+
+            // Agregar el pedido a la tabla
+            agregarPedido(mesa, producto, cantidad, precioTotal);
+
+            // Actualizar el total
+            actualizarTotal();
+        });
+
+        function calcularPrecioTotal(producto, cantidad) {
+            var precio = 0;
+            // Definir precios por producto (solo para demostración)
+            var precios = {
+                'Pizza Margarita': 450,
+                'Pizza Pepperoni': 350,
+                'Papas Fritas': 200,
+                'Ensalada César': 250,
+                'Pepsi Cola': 120,
+                'Agua Mineral': 100
+            };
+            precio = precios[producto] * cantidad;
+            return precio;
+        }
+
+        function agregarPedido(mesa, producto, cantidad, precioTotal) {
+            var tableBody = document.getElementById('pedidos-table').getElementsByTagName('tbody')[0];
+            var newRow = tableBody.insertRow();
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            var cell3 = newRow.insertCell(2);
+            var cell4 = newRow.insertCell(3);
+            var cell5 = newRow.insertCell(4); // Celda para el botón de eliminar
+            cell1.textContent = mesa; // Agregar el número de mesa
+            cell2.textContent = producto;
+            cell3.textContent = cantidad;
+            cell4.textContent = '$' + precioTotal.toFixed(2);
+            cell5.innerHTML = '<button onclick="eliminarPedido(this)">Eliminar</button>'; // Botón de eliminar
+        }
+
+        function eliminarPedido(row) {
+            var rowIndex = row.parentNode.parentNode.rowIndex;
+            document.getElementById('pedidos-table').deleteRow(rowIndex);
+            // Actualizar el total después de eliminar un pedido
+            actualizarTotal();
+        }
+
+        function actualizarTotal() {
+            var total = 0;
+            var rows = document.getElementById('pedidos-table').getElementsByTagName('tbody')[0].rows;
+            for (var i = 0; i < rows.length; i++) {
+                var precioTotal = parseFloat(rows[i].cells[3].textContent.replace('$', ''));
+                total += precioTotal;
+            }
+            document.getElementById('total').textContent = 'Total: $' + total.toFixed(2);
+        }
+
+        document.getElementById('btn-pagar').addEventListener('click', function() {
+            alert('Función de pago aún no implementada');
+            // Aquí puedes agregar la lógica para procesar el pago
+        });
+    </script>
+</body>
+</html>
+

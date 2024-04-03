@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizzería Little Cesart - Reserva de Mesas</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+    <style>
+        /* Estilos globales */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            color: #000;
+            background-color: #f5f5f5;
+        }
+
+        /* Estilos para el encabezado */
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #ff0000;
+            color: #fff;
+        }
+
+        /* Estilos para el contenido principal */
+        main {
+            padding: 20px;
+        }
+
+        /* Estilos para las secciones */
+        section {
+            margin-bottom: 20px;
+        }
+
+        /* Estilos para los botones */
+        .btn {
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #cc0000;
+        }
+
+        /* Estilos para las mesas */
+        .mesa {
+            border: 2px solid #000;
+            padding: 20px;
+            margin: 10px;
+            display: inline-block;
+            cursor: pointer;
+            font-size: 20px;
+            background-color: #fff;
+        }
+
+        /* Estilos para el formulario emergente */
+        #formulario {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        /* Estilos para el fondo oscuro */
+        #fondo-oscuro {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* Estilos para las reservaciones */
+        .reservacion {
+            border: 2px solid #000;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+        }
+
+        /* Estilos para el título de reservaciones */
+        #titulo-reservaciones {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #000;
+        }
+
+        /* Estilos para el botón de eliminar reserva */
+        .btn-eliminar {
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Estilos para el formulario de reservar mesa */
+        .formulario-reserva {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Estilos para el botón de cerrar formulario */
+        .btn-cerrar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        /* Estilos para el calendario */
+        #calendario {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            align-items: center;
+        }
+
+        #calendario table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #calendario th,
+        #calendario td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #calendario th {
+            background-color: #f2f2f2;
+        }
+
+        #calendario .dia:hover {
+            background-color: #ddd;
+            cursor: pointer;
+        }
+
+        #calendario .seleccionado {
+            background-color: #ff0000;
+            color: #fff;
+        }
+
+        /* Estilos para las imágenes de las mesas */
+        .mesa img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Pizzería Little Cesart</h1>
+    </header>
+    <main>
+        <section id="mesas-libres">
+            <h2>Mesas Libres</h2>
+            <div id="mesas-container">
+                <!-- Aquí se mostrarán las mesas dinámicamente -->
+            </div>
+        </section>
+
+        <section id="reservacion">
+            <h2>Reservación de Mesas</h2>
+            <button class="btn" onclick="mostrarFormulario()">Reservar Mesa</button>
+            <!-- Aquí irá el formulario para la reservación -->
+            <div id="formulario">
+                <button class="btn-cerrar" onclick="cerrarFormulario()">X</button>
+                <div class="formulario-reserva">
+                    <input type="hidden" id="mesa-reservada">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" required><br>
+                    <label for="cedula">Cédula:</label>
+                    <input type="text" id="cedula" required><br>
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" required><br>
+                    <label for="personas">Cantidad de Personas:</label>
+                    <input type="number" id="personas" required><br>
+                    <label for="fecha">Fecha de Reserva:</label>
+                    <input type="date" id="fecha" required><br>
+                    <label for="hora">Hora de Reserva:</label>
+                    <input type="time" id="hora" required><br>
+                    <button class="btn" onclick="reservarMesa()">Reservar</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="reservaciones">
+            <h2
+            <!-- Calendario para filtrar las reservaciones -->
+            <div id="calendario">
+                <h3>Seleccionar Fecha y Hora:</h3>
+                <input type="datetime-local" id="datetimepicker">
+                <button class="btn" onclick="filtrarReservaciones()">Filtrar</button>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Pizzería Little Cesart</p>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+    <script>
+        // Array para almacenar las mesas reservadas
+        let mesasReservadas = [];
+    
+        // Función para cargar las mesas al cargar la página
+        function cargarMesas() {
+            const contenedorMesas = document.getElementById("mesas-container");
+            contenedorMesas.innerHTML = "";
+            const totalMesas = 7;
+            for (let i = 0; i < totalMesas; i++) {
+                const divMesa = document.createElement("div");
+                divMesa.classList.add("mesa");
+                const imgMesa = document.createElement("img");
+                imgMesa.src = `mesa${i + 1}.jpg`;
+                imgMesa.alt = `Mesa ${i + 1}`;
+                divMesa.appendChild(imgMesa);
+                // Agregar evento de clic para seleccionar la mesa
+                divMesa.addEventListener("click", () => seleccionarMesa(i + 1));
+                contenedorMesas.appendChild(divMesa);
+            }
+        }
+    
+        // Función para mostrar el formulario de reservación
+        function mostrarFormulario() {
+            document.getElementById("formulario").style.display = "block";
+            document.getElementById("fondo-oscuro").style.display = "block";
+        }
+    
+        // Función para cerrar el formulario de reservación
+        function cerrarFormulario() {
+            document.getElementById("formulario").style.display = "none";
+            document.getElementById("fondo-oscuro").style.display = "none";
+        }
+    
+        // Función para seleccionar una mesa
+        function seleccionarMesa(numeroMesa) {
+            document.getElementById("mesa-reservada").value = numeroMesa;
+        }
+    
+        // Función para reservar una mesa
+        function reservarMesa() {
+            const mesaSeleccionada = document.getElementById("mesa-reservada").value;
+            const nombre = document.getElementById("nombre").value;
+            const cedula = document.getElementById("cedula").value;
+            const telefono = document.getElementById("telefono").value;
+            const personas = document.getElementById("personas").value;
+            const fecha = document.getElementById("fecha").value;
+            const hora = document.getElementById("hora").value;
+    
+            // Validar si la mesa ya está reservada para la misma fecha y hora
+            const mesaYaReservada = mesasReservadas.find(reserva => reserva.mesa === mesaSeleccionada && reserva.fecha === fecha && reserva.hora === hora);
+    
+            if (mesaYaReservada) {
+                alert("La mesa seleccionada ya está reservada para esta fecha y hora. Por favor, elige otra mesa o cambia la fecha/hora de reserva.");
+                return;
+            }
+    
+            // Crear objeto de reserva
+            const reserva = {
+                mesa: mesaSeleccionada,
+                nombre: nombre,
+                cedula: cedula,
+                telefono: telefono,
+                personas: personas,
+                fecha: fecha,
+                hora: hora
+            };
+    
+            // Agregar reserva al array de mesas reservadas
+            mesasReservadas.push(reserva);
+    
+            // Mostrar las reservaciones
+            mostrarReservaciones(mesasReservadas);
+    
+            // Cerrar el formulario de reservación
+            cerrarFormulario();
+        }
+    
+        // Función para mostrar las reservaciones
+        function mostrarReservaciones(reservaciones) {
+            const contenedorReservaciones = document.getElementById("reservaciones-container");
+            contenedorReservaciones.innerHTML = "";
+    
+            // Obtener la fecha seleccionada
+            const fechaSeleccionada = document.getElementById("datetimepicker").value;
+    
+            // Filtrar las reservaciones por fecha
+            const reservacionesFiltradas = reservaciones.filter(reserva => reserva.fecha === fechaSeleccionada);
+    
+            // Crear elementos para cada reserva
+            reservacionesFiltradas.forEach(reserva => {
+                const divReserva = document.createElement("div");
+                divReserva.classList.add("reservacion");
+                divReserva.innerHTML = `
+                    <div>
+                        <p><strong>Mesa:</strong> ${reserva.mesa}</p>
+                        <p><strong>Nombre:</strong> ${reserva.nombre}</p>
+                        <p><strong>Cédula:</strong> ${reserva.cedula}</p>
+                        <p><strong>Teléfono:</strong> ${reserva.telefono}</p>
+                        <p><strong>Personas:</strong> ${reserva.personas}</p>
+                    </div>
+                    <div>
+                        <p><strong>Fecha:</strong> ${reserva.fecha}</p>
+                        <p><strong>Hora:</strong> ${reserva.hora}</p>
+                        <button class="btn-eliminar" onclick="eliminarReserva(${reserva.mesa}, '${reserva.fecha}', '${reserva.hora}')">Eliminar</button>
+                    </div>`;
+                contenedorReservaciones.appendChild(divReserva);
+            });
+        }
+    
+        // Función para eliminar una reserva
+        function eliminarReserva(numeroMesa, fecha, hora) {
+            // Filtrar el array de reservaciones para eliminar la reserva especificada
+            mesasReservadas = mesasReservadas.filter(reserva => !(reserva.mesa === numeroMesa && reserva.fecha === fecha && reserva.hora === hora));
+    
+            // Volver a mostrar las reservaciones actualizadas
+            mostrarReservaciones(mesasReservadas);
+        }
+    
+        // Función para filtrar las reservaciones por fecha y hora
+        function filtrarReservaciones() {
+            mostrarReservaciones(mesasReservadas);
+        }
+    
+        // Ejecutar funciones al cargar la página
+        window.onload = function () {
+            cargarMesas();
+        };
+    </script>
+    
